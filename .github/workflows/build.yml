@@ -1,8 +1,9 @@
-name: on-push
+name: build
 
 on:
   push:
     branches:
+      - main
 
 jobs:
   build:
