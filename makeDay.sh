@@ -13,6 +13,8 @@ testDir=src/test/kotlin/adventcode/day"${dayNumber}"
 mkdir $mainDir
 mkdir $testDir
 
+touch src/test/resources/day"${dayNumber}"input.txt
+
 mainFile="$mainDir/day${dayNumber}.kt"
 testFile="$testDir/Day${dayNumber}Test.kt"
 
