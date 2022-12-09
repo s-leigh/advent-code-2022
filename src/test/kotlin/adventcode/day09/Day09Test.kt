@@ -144,7 +144,7 @@ U 20"""
                 Pair(0, 0),
                 Pair(0, 0)
             )
-            assertEquals(expected, newRopePositions(rope, listOf(head)))
+            assertEquals(expected, newRopePosition(listOf(head), rope))
         }
     }
 }

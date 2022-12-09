@@ -7,47 +7,55 @@ private typealias y = Int
 
 fun day09Part01(input: String): Int {
     val instructions = getInstructions(input)
-    val visitedTailCoords = visitedTailCoordinates(instructions, 2)
+    val rope = List(2) { Pair(0, 0) }
+    val visitedTailCoords = visitedTailCoordinates(instructions, rope)
     return visitedTailCoords.size
 }
 
 fun day09Part02(input: String): Int {
     val instructions = getInstructions(input)
-    val visitedTailCoords = visitedTailCoordinates(instructions, 10)
+    val rope = List(10) { Pair(0, 0) }
+    val visitedTailCoords = visitedTailCoordinates(instructions, rope)
     return visitedTailCoords.size
 }
 
-private fun visitedTailCoordinates(instructions: List<Pair<String, Int>>, ropeSize: Int): List<Pair<x, y>> {
-    var rope = List(ropeSize) { Pair(0, 0) }
-    val visitedTailCoords = instructions.flatMap { instruction ->
-        (0 until instruction.second).map {
-            val newHeadCoords = newHeadCoords(instruction.first, rope[0])
-            rope = newRopePositions(rope.slice(1..rope.lastIndex), listOf(newHeadCoords))
-            rope.last()
-        }
-    }.distinct()
-    return visitedTailCoords
-}
-
-private fun getInstructions(input: String): List<Pair<String, Int>> =
+// Parse instructions as list of single directions, e.g. "U 4" becomes {'U', 'U', 'U', 'U'}
+private fun getInstructions(input: String): CharArray =
     input.split('\n')
         .map { it.split(' ') }
         .map { Pair(it[0], Integer.parseInt(it[1])) }
+        .map { it.first.repeat(it.second).toCharArray() }
+        .reduce { acc, elem -> acc.plus(elem) }
 
-internal fun newRopePositions(tail: List<Pair<x, y>>, head: List<Pair<x, y>>): List<Pair<x, y>> {
-    if (tail.size == 1) return head.plus(newKnotCoords(head.last(), tail.single()))
-    val newCoords = newKnotCoords(head.last(), tail.first())
-    return newRopePositions(tail.slice(1..tail.lastIndex), head.plus(newCoords))
+private tailrec fun visitedTailCoordinates(
+    instructions: CharArray,
+    rope: List<Pair<x, y>>,
+    visitedTailCoords: List<Pair<x, y>> = listOf()
+): List<Pair<x, y>> {
+    if (instructions.isEmpty()) return visitedTailCoords.distinct()
+    val newHeadCoords = newHeadCoords(instructions[0], rope[0])
+    val newRopePosition = newRopePosition(listOf(newHeadCoords), rope.slice(1..rope.lastIndex))
+    return visitedTailCoordinates(
+        instructions.sliceArray(1..instructions.lastIndex),
+        newRopePosition,
+        visitedTailCoords.plus(newRopePosition.last())
+    )
 }
 
-private fun newHeadCoords(instructionDirection: String, headStart: Pair<x, y>): Pair<x, y> =
+private fun newHeadCoords(instructionDirection: Char, headStart: Pair<x, y>): Pair<x, y> =
     when (instructionDirection) {
-        "R" -> Pair(headStart.first + 1, headStart.second)
-        "L" -> Pair(headStart.first - 1, headStart.second)
-        "U" -> Pair(headStart.first, headStart.second + 1)
-        "D" -> Pair(headStart.first, headStart.second - 1)
+        'R' -> Pair(headStart.first + 1, headStart.second)
+        'L' -> Pair(headStart.first - 1, headStart.second)
+        'U' -> Pair(headStart.first, headStart.second + 1)
+        'D' -> Pair(headStart.first, headStart.second - 1)
         else -> throw Exception("Unrecognised direction $instructionDirection")
     }
+
+internal tailrec fun newRopePosition(head: List<Pair<x, y>>, tail: List<Pair<x, y>>): List<Pair<x, y>> {
+    if (tail.size == 1) return head.plus(newKnotCoords(head.last(), tail.single()))
+    val newCoords = newKnotCoords(head.last(), tail.first())
+    return newRopePosition(head.plus(newCoords), tail.slice(1..tail.lastIndex))
+}
 
 internal fun newKnotCoords(leader: Pair<x, y>, knot: Pair<x, y>): Pair<x, y> {
     val xDifference = abs(leader.first - knot.first)
