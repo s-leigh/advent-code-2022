@@ -26,7 +26,7 @@ import kotlin.test.assertEquals
 
 class Day${dayNumber}Test {
     private val input = this::class.java.classLoader.getResource(\"./day${dayNumber}input.txt\")!!.readText()
-    private val sampleInput = """""""
+    private val sampleInput = \"\"\"\"\"\"\"
 
     @Test
     fun testDay${dayNumber}Part01SampleInput() {
